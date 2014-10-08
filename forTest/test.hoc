@@ -1,0 +1,71 @@
+load_file("nrngui.hoc")
+load_file("graph.ses")
+begintemplate neuron
+public soma, esyn//, if2
+create soma
+objref esyn//, if2
+proc init(){
+    soma {
+	L = 10
+	diam = 100
+	nseg  = 1
+	esyn = new Exp2Syn(0.5)
+	//if2 = new IntFire2(0)
+	//if2.ib = 1.2
+	insert hh
+    }
+}
+
+endtemplate neuron
+
+objref Hneuron[2]
+
+Hneuron[0] = new neuron()
+Hneuron[1] = new neuron()
+
+
+
+objectvar stim
+stim = new PoissonNoise(0.8)
+stim.del = 0
+stim.dur = 10000
+stim.amp = 0.065
+
+objectvar stim2[2]
+for i=0, 1 Hneuron[i].soma{
+    //stim2[i] = new GaussianNoise(0.8)
+    //stim2[i] = new PoissonNoise(0.8)
+    stim2[i] = new GammaNoise(0.8)
+    stim2[i].del = 0
+    stim2[i].dur = 10000
+    stim2[i].amp = 0.065
+}
+
+
+objref nclist
+nclist = new List()
+for i=0, 1{
+    nclist.append(new NetCon(stim2[i],Hneuron[i].esyn,0.0,0,0.02))
+}
+
+//objref fp
+
+//fp = new File()
+//fp.wopen("a.dat")
+//nclist.append(new NetCon(stim2,Hneuron.esyn,0.0,0,0.02))
+tstop = 10000
+dt = 0.25
+run()
+//double a[2]
+//finitialize(v_init)
+//fcurrent()
+//while(t<tstop){
+  //  fadvance()
+    //a[0] = t
+    //a[1] = Hneuron[0].soma.v(0.5)
+    //fp.vwrite(2,&a)
+    //fp.vwrite(&Hneuron[0].soma.v(0.5))
+//}
+//fp.close()
+//fp.fwrite("a.dat")
+//fp.close()
