@@ -5,10 +5,11 @@
 #include "MT.h"
 
 #define NUM 1000
-#define THETA 0.01//1.05//3.0
-#define KAPPA 1.0//0.025//4
+#define THETA 0.5//1.0//1.05//3.0
+#define KAPPA 1000//.01//0.025//4
 double uniform(){
-  return ((double)(rand()+1.0))/((double)RAND_MAX+2.0);
+  return genrand_real3();
+  // return ((double)(rand()+1.0))/((double)RAND_MAX+2.0);
 }
 
 double rand_gamma(double theta, double kappa){
@@ -21,6 +22,7 @@ double rand_gamma(double theta, double kappa){
   double u,uu;
   double b,p,x_frac,x_int;
   int i;
+ 
   
   x_int = 0;
   for(i=0;i<int_kappa;i++){
@@ -52,6 +54,7 @@ int main(){
   int i;
   double ave = 0.0, var = 0.0;
   double gam[NUM];
+  double max=-100, min = 100;
   FILE *fp;
   if((fp=fopen("result.dat","w"))==NULL){
     printf("file open error\n");
@@ -64,6 +67,12 @@ int main(){
     printf("%lf ",gam[i-1]=rand_gamma(THETA,KAPPA));
     fprintf(fp,"%lf \n",gam[i-1]);
     ave += gam[i-1]/(double)NUM;
+    if(gam[i-1]>max){
+      max = gam[i-1];
+    }
+    if(gam[i-1]<min){
+      min = gam[i-1];
+    }
     if(i%((int)sqrt((double)NUM))==0){
       printf("\n");
     }
@@ -74,6 +83,7 @@ int main(){
   }
   printf("\naverage = %lf (ref:%lf)\n",ave,KAPPA*THETA);
   printf("variance = %lf (ref::%lf)\n",var, KAPPA*THETA*THETA);
+  printf("max = %lf\t min = %lf\n",max,min);
   fclose(fp);
   return 0;
 }

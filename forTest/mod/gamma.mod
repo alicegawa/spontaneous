@@ -7,11 +7,12 @@ ENDCOMMENT
 
 NEURON {
     POINT_PROCESS GammaNoise
-    RANGE del, dur, amp, i, R, forRand, forRand2, k, n, tmp_n, THETA, KAPPA, int_kappa, frac_kappa, b, p, x_frac, x_int, roop
+    RANGE del, dur, amp, i, R, forRand, forRand2, k, n, tmp_n, THETA, KAPPA, int_kappa, frac_kappa, b, p, x_frac, x_int, roop, i_max, i_min, times, ave_v
     ELECTRODE_CURRENT i
 }
 UNITS {
     (nA) = (nanoamp)
+    (mV) = (millivolt)
 }
 
 PARAMETER {
@@ -24,8 +25,8 @@ PARAMETER {
     k = 0 :counter
     n = 2.7 :parameter to adjust
     tmp_n = 1
-    THETA = 1.0:1.05 :parameter(sita no to awase te 3Hz kurai)
-    KAPPA = 0.01:0.01:parameter
+    THETA = 0.017:1.05 :parameter(sita no to awase te 3Hz kurai)
+    KAPPA = 0.16:0.01:parameter
     int_kappa = 1
     frac_kappa = 0
     b = 1
@@ -33,8 +34,14 @@ PARAMETER {
     x_frac = 0
     x_int = 1
     roop = 0
+    i_max = -100
+    i_min = 100
+    times = 0
+    ave_v = 0
 }
-ASSIGNED { i (nA) }
+ASSIGNED { i (nA) 
+    v (mV)
+}
 
 INITIAL {
     i = 0
@@ -77,11 +84,29 @@ BREAKPOINT {
     }
     amp = THETA*(x_frac+x_int);
     ENDVERBATIM
+    :printf("amp = %g\n",amp)
 
     if (t < del + dur && t >= del) {
 	i = amp
-	printf("i = %g (nA)\n",i)
+	:printf("i = %g (nA)\n",i)
+	if(i>i_max){
+	    i_max = i
+	    VERBATIM
+	    usleep(1);
+	    ENDVERBATIM
+	}
+	if(i<i_min){
+	    i_min = i
+	    VERBATIM
+	    usleep(1);
+	    ENDVERBATIM
+	}
+	:printf("i_max = %g\t i_min = %g\n",i_max,i_min)
     }else{
 	i = 0
     }
+    times = times + 1
+    ave_v = ave_v + v
+    :printf("current average of voltage is %g\n",ave_v/times)
+    
 }

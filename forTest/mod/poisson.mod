@@ -22,7 +22,7 @@ PARAMETER {
     forRand = 0.01
     forRand2 = 0.01
     k = 0 :counter
-    n = 2.7 :parameter to adjust
+    n = 0.26:2.7 :parameter to adjust
     tmp_n = 1
 }
 ASSIGNED { i (nA) }
@@ -52,13 +52,14 @@ BREAKPOINT {
 	tmp_n *= forRand2;
 	k = k+1;
     }
-    k -= n;
-    amp = 2*k/n;
+    /*k -= n;*/
+    /*amp = 2*k/n;*/
+    amp = k;
     ENDVERBATIM
 
     if (t < del + dur && t >= del) {
 	i = amp
-	printf("i = %g (nA)\n",i)
+	:printf("i = %g (nA)\n",i)
     }else{
 	i = 0
     }

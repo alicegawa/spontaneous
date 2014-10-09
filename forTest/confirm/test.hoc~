@@ -9,11 +9,10 @@ proc init(){
 	L = 10
 	diam = 100
 	nseg  = 1
-	esyn = new Exp2Syn(0.5)
+	esyn = new ExpSyn(0.5)
 	insert hh
     }
 }
-
 endtemplate neuron
 
 objref Hneuron[2]
@@ -22,23 +21,17 @@ Hneuron[0] = new neuron()
 Hneuron[1] = new neuron()
 
 
-
 objectvar stim2[2]
 for i=0, 1 Hneuron[i].soma{
-    //stim2[i] = new GaussianNoise(0.5)
-    stim2[i] = new PoissonNoise(0.5)
+    stim2[i] = new IClamp(0.5)
+    //stim2[i] = new PoissonNoise(0.5)
     //stim2[i] = new GammaNoise(0.5)
     stim2[i].del = 0
     stim2[i].dur = 10000
-    stim2[i].amp = 0.065
+    stim2[i].amp = 0.0065
 }
 
 
-objref nclist
-nclist = new List()
-for i=0, 1{
-    nclist.append(new NetCon(stim2[0],Hneuron[0].esyn,0.0,0,0.02))//0.02))
-}
 tstop = 10000
 dt = 0.25
 run()

@@ -19,7 +19,7 @@ PARAMETER {
     del (ms)
     dur (ms)	<0,1e9>
     amp (nA)
-    R = 3700:daitai 2Hz kurai ni nattayo:soreppoi no ha 3000 (almost 6Hz)
+    R = 2000:daitai 2Hz ni natta yo!
     forRand = 0.01
     forRand2 = 0.01
     tmp  = 0
@@ -54,15 +54,16 @@ BREAKPOINT {
     forRand2 = ((double)(rand()+1.0))/((double)RAND_MAX+2.0);
     amp = sqrt( -2.0 * log(forRand))*sin(2.0*3.141593*forRand2);
     amp = amp/R;
+    /*printf("amp = %lf\n",amp);*/
     ENDVERBATIM
 
     if (t < del + dur && t >= del) {
 	i = amp
-	printf("i = %g (nA)\n",i)
+	:printf("i = %g (nA)\n",i)
     }else{
 	i = 0
     }
-    printf("v = %g\n",v)
+    :printf("v = %g\n",v)
     if(v>0){
 	if(flag==0){
 	    counter = counter + 1
@@ -83,10 +84,10 @@ BREAKPOINT {
     if(min>amp){
 	min = amp;
     }
-    ave = ave + amp;
-    ave_v = ave_v + v;
-    printf("ave_v = %lf \n",ave_v/(double)loop);
+    /*ave = ave + amp;*/
+    /*ave_v = ave_v + v;*/
+    /*printf("ave_v = %lf \n",ave_v/(double)loop);*/
     /*printf("max = %lf \t min = %lf\t current average = %lf\n",max,min,ave/(double)loop);*/
     ENDVERBATIM
-    printf("counter = %g\n",counter)
+    :printf("counter = %g\n",counter)
 }
