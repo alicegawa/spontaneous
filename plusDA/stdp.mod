@@ -41,7 +41,7 @@ STATE {
 }
 
 INITIAL {
-	g=0.01
+	g=0.0
 	tpost = -1e9
 	net_send(0, 1)
 	:numbre = 0

@@ -1,0 +1,150 @@
+load_file("nrngui.hoc")
+begintemplate HHneuron
+
+public soma, ap_dend, esyn, esyn2
+create soma, ap_dend
+objref esyn, esyn2
+proc init(){
+    soma{
+	L = 30
+	soma.diam = 30
+	soma.nseg = 1
+	soma insert hh
+    }
+    ap_dend {
+	L = 500
+	diam = 2
+	nseg = 23
+	insert hh
+	gnabar_hh = 0.012
+	nkbar_hh = 0.0036
+	gl_hh = 0.00003
+    }
+    connect ap_dend(0),soma(1)
+    ap_dend esyn = new ExpSyn(0.8)
+    esyn.tau = 5
+    esyn.e = 0
+    
+}
+endtemplate HHneuron
+
+begintemplate HHneuron2
+
+public soma, ap_dend, esyn, esyn2
+create soma, ap_dend
+objref esyn, esyn2, esyn3
+proc init(){
+    soma{
+	L = 30
+	soma.diam = 30
+	soma.nseg = 1
+	soma insert hh
+    }
+    ap_dend {
+	L = 500
+	diam = 2
+	nseg = 23
+	insert hh
+	gnabar_hh = 0.012
+	nkbar_hh = 0.0036
+	gl_hh = 0.00003
+    }
+    connect ap_dend(0),soma(1)
+    ap_dend esyn = new ExpSyn(0.8)
+    esyn.tau = 5
+    esyn.e = 0
+    ap_dend esyn2 = new ExpSynSTDP(0.2)
+    esyn2.tau = 5
+    esyn2.d = 1
+    esyn2.p = 1
+    esyn2.verbose=0
+    esyn2.LR = 0.00015    
+}
+endtemplate HHneuron2
+
+objref hh_neuron[2]
+hh_neuron[0] = new HHneuron()
+hh_neuron[1] = new HHneuron2()
+
+objref stim
+git@github.com:alicegawa/network.gitstim = new NetStim(0.5)
+stim.interval = 25
+stim.number = 500
+stim.start = 10
+stim.noise = 0.1
+
+objref stim2
+stim2 = new NetStim(0.5)
+stim2.interval = 50//200 //before 50
+stim2.number = 250//63 //now, in this session, weight is depressing//before 250 //in this session, and stim->hh[0] + stim2->hh[1] => final_weight 1
+stim2.start = 20
+stim2.noise = 0.1
+///////////////////////////////////////////////////////
+/////////now not using////////////////////////////////
+objref stim3
+stim3 = new NetStim(0.5)
+stim3.interval = 20
+stim3.number = 50
+stim3.start = 12530
+stim3.noise = 0
+///////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+objref r
+r = new Random()
+initRandMinRange = 0
+initRandMaxRange = 1
+
+
+weightTmp = 0.005*r.uniform(0.5,2)*10
+objref nclist
+nclist = new List()
+nclist.append(new NetCon(stim2, hh_neuron[0].esyn,0.0,1,weightTmp))
+//hh_neuron[0].soma nclist.append(new NetCon(&v(0.5), hh_neuron[1].esyn2,10,1,0.02))
+objref nclist3
+nclist3 = new List()
+nclist3.append(new NetCon(stim,hh_neuron[1].esyn,0.0,1,weightTmp))
+
+objref nclist4
+nclist4 = new List()
+nclist4.append(new NetCon(stim3,hh_neuron[0].esyn,0.0,1,weightTmp))
+
+weightTmp = 0.005*r.uniform(initRandMinRange,initRandMaxRange)*10
+printf("first weight = %lf \n",weightTmp)
+recordWeight = weightTmp
+objref nclist2
+nclist2 = new List()
+hh_neuron[0].soma nclist2.append(new NetCon(&v(0.5), hh_neuron[1].esyn2,0.0,1,weightTmp))
+
+//hh_neuron[1].soma nclist2.append(new NetCon(&v(0.5), hh_neuron[0].esyn,10,1,0.02))
+//hh_neuron[0].soma nclist2.append(new NetCon(&v(0.5), hh_neuron[1].esyn2,10,1,0.02))
+tstop = 14000
+dt = 0.01
+//v_init = -65
+DA=0.01
+t=0
+objref fp
+double a[3]
+//num = 0
+fp = new File()
+fp.wopen("a.dat")
+finitialize()
+fcurrent()
+while(t<tstop){
+    fadvance()
+    //num = num + 1
+    a[0] = t
+    a[1] = hh_neuron[0].soma.v(0.5)
+    a[2] = hh_neuron[1].soma.v(0.5)
+    fp.vwrite(3,&a)
+    if(hh_neuron[1].esyn2.forSpike==1){
+	hh_neuron[1].esyn2.forSpike=0
+	DA = DA + 1
+    }
+    hh_neuron[1].esyn2.forDA = DA
+    DA = DA*0.999999
+}
+fp.close()
+printf("DA = %lf \n",DA)
+printf("first weight = %lf \n",recordWeight)
+printf("last weight = %lf\n",nclist2.object(0).weight)
+//WinExec("gc a.dat")
